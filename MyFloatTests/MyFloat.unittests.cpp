@@ -1,5 +1,6 @@
 #include "MyFloat.h"
 #include "gtest\gtest.h"
+#include <iostream>
 #include <type_traits>
 #include <thread>
 
@@ -54,13 +55,47 @@ TEST(MyFloatTests, PositationLeavesMyFloatUnchanged)
   ASSERT_EQ(a, +a);
 }
 
-TEST(MyFloatTests, MyFloatAddition)
+struct AdditionTestCase
 {
-  //std::this_thread::sleep_for(std::chrono::seconds(10));
-  ASSERT_EQ(0.0_f + 0.0_f, 0.0_f);
-  ASSERT_EQ(0.0_f + 1.0_f, 1.0_f);
-  ASSERT_EQ(1.0_f + 0.0_f, 1.0_f);
-  ASSERT_EQ(1.0_f + 1.0_f, 2.0_f);
-  // ASSERT_EQ(42.0_f + 75.0_f, 117.0_f);
+  double first;
+  double second;
+  double result;
+};
+
+auto operator<<(std::ostream& os, AdditionTestCase const& value)
+{
+  return os << value.first << " + " << value.second << " = " << value.result;
 }
+
+class MyFloatAdditionTests : public ::testing::TestWithParam<AdditionTestCase>
+{
+};
+
+TEST_P(MyFloatAdditionTests, CheckThatAdditionGivesExpectedResult)
+{
+  auto const& param = GetParam();
+  auto x = MyFloat{ param.first };
+  auto y = MyFloat{ param.second };
+  auto expectedResult = MyFloat{ param.result };
+  ASSERT_EQ(expectedResult, x + y);
+}
+
+static const auto AdditionTestCases = ::testing::Values(
+  AdditionTestCase{ 0.0, 0.0, 0.0 },
+  AdditionTestCase{ 0.0, 1.0, 1.0 },
+  AdditionTestCase{ 1.0, 0.0, 1.0 },
+  AdditionTestCase{ 1.0, 1.0, 2.0 },
+  AdditionTestCase{ 0.5, 0.5, 1.0 }
+)
+
+//TEST(MyFloatTests, MyFloatAddition)
+//{
+//  //std::this_thread::sleep_for(std::chrono::seconds(10));
+//  ASSERT_EQ(0.0_f + 0.0_f, 0.0_f);
+//  ASSERT_EQ(0.0_f + 1.0_f, 1.0_f);
+//  ASSERT_EQ(1.0_f + 0.0_f, 1.0_f);
+//  ASSERT_EQ(1.0_f + 1.0_f, 2.0_f);
+//  ASSERT_EQ(0.5_f + 0.5_f, 1.0_f);
+//  // ASSERT_EQ(42.0_f + 75.0_f, 117.0_f);
+//}
 
