@@ -1,5 +1,5 @@
-#include "pch.h"
 #include "MyFloat.h"
+#include "gtest\gtest.h"
 #include <type_traits>
 #include <thread>
 
