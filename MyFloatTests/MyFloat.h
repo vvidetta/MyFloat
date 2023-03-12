@@ -30,4 +30,9 @@ private:
   uint64_t repr;
 };
 
+MyFloat operator ""_f(long double x)
+{
+  return MyFloat{ static_cast<double>(x) };
+}
+
 #endif // MYFLOAT_H
