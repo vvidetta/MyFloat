@@ -1,10 +1,33 @@
 #ifndef MYFLOAT_H
 #define MYFLOAT_H
 
+template <
+  typename TOut,
+  typename TIn
+>
+TOut bit_cast(TIn x)
+{
+  static_assert(sizeof(TOut) == sizeof(TIn));
+
+  TOut y;
+  std::memcpy(&y, &x, sizeof(TOut));
+  return y;
+}
+
 struct MyFloat {
-  operator double() const {
-    return 0.0;
+
+  explicit MyFloat(double x = 0.0)
+    : repr{ bit_cast<uint64_t>(x) }
+  {
   }
+
+  operator double() const
+  {
+    return bit_cast<double>(repr);
+  }
+
+private:
+  uint64_t repr;
 };
 
 #endif // MYFLOAT_H
