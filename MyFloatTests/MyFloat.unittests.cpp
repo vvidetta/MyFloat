@@ -5,13 +5,13 @@
 TEST(MyFloatTests, ADefaultConstructedMyFloatIsZero)
 {
   auto myFloat = MyFloat{};
-  ASSERT_EQ(0.0, myFloat);
+  ASSERT_EQ(0.0, myFloat.to_double());
 }
 
 TEST(MyFloatTests, AMyFloatConstructedWithADoubleRoundTrips)
 {
   auto myFloat = MyFloat{ 1.0 };
-  ASSERT_EQ(1.0, myFloat);
+  ASSERT_EQ(1.0, myFloat.to_double());
 }
 
 TEST(MyFloatTests, AMyFloatDefinedWithAUserDefinedLiteralRoundTrips)
@@ -20,13 +20,30 @@ TEST(MyFloatTests, AMyFloatDefinedWithAUserDefinedLiteralRoundTrips)
 
   // NB: extra parens needed to avoid pre-processor swallowing comma in template argument list
   ASSERT_TRUE((std::is_same_v<MyFloat, decltype(myFloat)>));
-  ASSERT_EQ(1.0, myFloat);
+  ASSERT_EQ(1.0, myFloat.to_double());
 }
 
-TEST(MyFloatTests, MyFloatEqualityIsReflexive)
+TEST(MyFloatTests, MyFloatEquality)
 {
-  auto f1 = 42.0_f;
-  auto myFloatEqualsSelf = f1 == f1;
-  ASSERT_TRUE(myFloatEqualsSelf);
+  auto a = 42.0_f;
+  ASSERT_TRUE(a == a);
+
+  auto b = 42.0_f;
+  ASSERT_TRUE(a == b);
+
+  auto c = MyFloat{ -42.0 };
+  ASSERT_FALSE(a == c);
+}
+
+TEST(MyFloatTests, MyFloatInequality)
+{
+  auto a = 42.0_f;
+  ASSERT_FALSE(a != a);
+
+  auto b = 42.0_f;
+  ASSERT_FALSE(a != b);
+
+  auto c = MyFloat{ -42.0 };
+  ASSERT_TRUE(a != c);
 }
 

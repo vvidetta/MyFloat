@@ -21,13 +21,23 @@ struct MyFloat {
   {
   }
 
-  operator double() const
+  [[nodiscard]] double to_double() const
   {
     return bit_cast<double>(repr);
   }
 
 private:
   uint64_t repr;
+
+  friend bool operator==(MyFloat const& lhs, MyFloat const& rhs)
+  {
+    return lhs.repr == rhs.repr;
+  }
+
+  friend bool operator!= (MyFloat const& lhs, MyFloat const& rhs)
+  {
+    return !(lhs == rhs);
+  }
 };
 
 MyFloat operator ""_f(long double x)
