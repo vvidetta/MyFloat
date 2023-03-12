@@ -154,9 +154,11 @@ private:
   }
 };
 
-MyFloat operator ""_f(long double x)
-{
-  return MyFloat{ static_cast<double>(x) };
+namespace MyFloat_literals {
+  static MyFloat operator ""_f(long double x)
+  {
+    return MyFloat{ static_cast<double>(x) };
+  }
 }
 
 #endif // MYFLOAT_H
