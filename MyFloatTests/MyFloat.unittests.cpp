@@ -62,7 +62,7 @@ struct AdditionTestCase
   double result;
 };
 
-auto operator<<(std::ostream& os, AdditionTestCase const& value)
+auto operator<<(std::ostream& os, AdditionTestCase const& value) -> std::ostream&
 {
   return os << value.first << " + " << value.second << " = " << value.result;
 }
@@ -86,16 +86,7 @@ static const auto AdditionTestCases = ::testing::Values(
   AdditionTestCase{ 1.0, 0.0, 1.0 },
   AdditionTestCase{ 1.0, 1.0, 2.0 },
   AdditionTestCase{ 0.5, 0.5, 1.0 }
-)
+);
 
-//TEST(MyFloatTests, MyFloatAddition)
-//{
-//  //std::this_thread::sleep_for(std::chrono::seconds(10));
-//  ASSERT_EQ(0.0_f + 0.0_f, 0.0_f);
-//  ASSERT_EQ(0.0_f + 1.0_f, 1.0_f);
-//  ASSERT_EQ(1.0_f + 0.0_f, 1.0_f);
-//  ASSERT_EQ(1.0_f + 1.0_f, 2.0_f);
-//  ASSERT_EQ(0.5_f + 0.5_f, 1.0_f);
-//  // ASSERT_EQ(42.0_f + 75.0_f, 117.0_f);
-//}
+INSTANTIATE_TEST_SUITE_P(AdditionTestCases, MyFloatAdditionTests, AdditionTestCases);
 
