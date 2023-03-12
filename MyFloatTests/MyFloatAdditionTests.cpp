@@ -1,7 +1,9 @@
 #include "MyFloat.h"
 #include "gtest/gtest.h"
 #include <iostream>
+#include <numeric>
 #include <ranges>
+#include <random>
 
 struct AdditionTestCase
 {
@@ -33,32 +35,24 @@ TEST_P(MyFloatAdditionTests, CheckThatAdditionGivesExpectedResult)
   ASSERT_EQ(expectedResult, x + y);
 }
 
-static auto ensureAdditionIsCommutative(std::vector<AdditionTestCase>& testCases) noexcept -> void
+static constexpr auto number_of_doubles = 100i64;
+static constexpr auto double_seed = 0Ui64;
+static auto mt19937 = std::mt19937_64{ double_seed };
+
+[[nodiscard]] static constexpr auto getDoubles() noexcept
 {
-  for (auto it = std::begin(testCases); it != std::end(testCases); ++it)
-  {
-    if (it->first == it->second) {
-      continue;
-    }
-
-    auto reversedCase = AdditionTestCase{ it->second, it->first, it->result };
-    if (std::ranges::find(testCases, reversedCase) != std::ranges::end(testCases)) {
-      continue;
-    }
-
-    it = testCases.insert(it + 1, reversedCase);
-  }
+  auto doubles = std::vector<double>(number_of_doubles);
+  std::ranges::generate(doubles, []() -> double { return std::bit_cast<double>(mt19937()); });
+  return doubles;
 }
 
 [[nodiscard]] static auto getAdditionTestCases() noexcept
 {
-  auto testCases = std::vector{
-    AdditionTestCase{ 0.0, 0.0, 0.0 },
-    AdditionTestCase{ 0.0, 1.0, 1.0 },
-    AdditionTestCase{ 1.0, 1.0, 2.0 },
-    AdditionTestCase{ 0.5, 0.5, 1.0 }
-  };
-  ensureAdditionIsCommutative(testCases);
+  auto testCases = std::vector<AdditionTestCase>();
+  auto doubles = getDoubles();
+  for (auto x : doubles)
+    for (auto y : doubles)
+      testCases.push_back(AdditionTestCase{ x, y, x + y });
   return testCases;
 }
 

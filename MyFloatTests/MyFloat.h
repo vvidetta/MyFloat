@@ -3,10 +3,11 @@
 
 #include <bit>
 #include <climits>
+#include <numeric>
 
 struct MyFloat {
 
-  explicit MyFloat(double x = 0.0)
+  constexpr explicit MyFloat(double x = 0.0)
     : repr{ std::bit_cast<uint64_t>(x) }
   {
   }
@@ -108,49 +109,46 @@ private:
 
     auto mx = x.mantissa();
     mx |= 1Ui64 << man_width;
+    mx <<= (exp_width - 2Ui64);
 
     auto my = y.mantissa();
     my |= 1Ui64 << man_width;
+    my <<= (exp_width - 2Ui64);
+
+    auto ex = x.exponent();
+    ex -= (exp_width - 2Ui64);
+
+    auto ey = y.exponent();
+    ey -= (exp_width - 2Ui64);
+
+    if (ex > ey) {
+      my >>= ex - ey;
+      ey = ex;
+    } else if (ey > ex) {
+      mx >>= ey - ex;
+      ex = ey;
+    }
+
+    if (x.signum() == 1Ui64) {
+      mx = (~mx) ^ 1Ui64;
+    }
+    if (y.signum() == 1Ui64) {
+      my = (~my) ^ 1Ui64;
+    }
 
     auto mr = mx + my;
 
+    auto sr = extract_field(mr, sign_pos, sign_width);
+
+    if (sr == 1Ui64)
+      mr = (~mr) ^ 1Ui64;
     auto shift = top_bit(mr) - man_width;
+    auto er = ex + shift;
+
     mr >>= shift;
     unset_bit(mr, man_width);
 
-    auto er = x.exponent() + shift;
-
-    return MyFloat{ 0Ui64, er, mr };
-
-    //auto mx = x.mantissa();
-    //auto ex = x.exponent();
-    //auto my = y.mantissa();
-    //auto ey = y.exponent();
-
-    //mx |= 1Ui64 << man_width;
-    //my |= 1Ui64 << man_width;
-
-    //if (ex == ey)
-    //{
-    //  auto mr = (mx + my) >> 1;
-    //  return MyFloat{ x.signum(), ex, mr };
-    //} else if (ex > ey) {
-    //  if (ex - ey < exp_width)
-    //  {
-    //    auto wx = man_width + 1 + (ex - ey);
-    //    mx <<= (ex - ey);
-    //    mx += my;
-    //    auto de = (top_bit(mx) - (man_width + 1));
-    //    mx >>= de;
-    //    ex = ey + de;
-    //    return MyFloat{ x.signum(), ex, mx };
-    //  }
-    //  else {
-    //    return MyFloat{ }; // TODO
-    //  }
-    //}
-
-    //return MyFloat{}; // TODO
+    return MyFloat{ sr, er, mr };
   }
 };
 
