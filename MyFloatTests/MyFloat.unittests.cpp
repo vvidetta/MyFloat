@@ -22,3 +22,11 @@ TEST(MyFloatTests, AMyFloatDefinedWithAUserDefinedLiteralRoundTrips)
   ASSERT_TRUE((std::is_same_v<MyFloat, decltype(myFloat)>));
   ASSERT_EQ(1.0, myFloat);
 }
+
+TEST(MyFloatTests, MyFloatEqualityIsReflexive)
+{
+  auto f1 = 42.0_f;
+  auto myFloatEqualsSelf = f1 == f1;
+  ASSERT_TRUE(myFloatEqualsSelf);
+}
+
