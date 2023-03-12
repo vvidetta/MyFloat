@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "MyFloat.h"
 #include <type_traits>
+#include <thread>
 
 TEST(MyFloatTests, ADefaultConstructedMyFloatIsZero)
 {
@@ -45,5 +46,21 @@ TEST(MyFloatTests, MyFloatInequality)
 
   auto c = MyFloat{ -42.0 };
   ASSERT_TRUE(a != c);
+}
+
+TEST(MyFloatTests, PositationLeavesMyFloatUnchanged)
+{
+  auto a = 42.0_f;
+  ASSERT_EQ(a, +a);
+}
+
+TEST(MyFloatTests, MyFloatAddition)
+{
+  //std::this_thread::sleep_for(std::chrono::seconds(10));
+  ASSERT_EQ(0.0_f + 0.0_f, 0.0_f);
+  ASSERT_EQ(0.0_f + 1.0_f, 1.0_f);
+  ASSERT_EQ(1.0_f + 0.0_f, 1.0_f);
+  ASSERT_EQ(1.0_f + 1.0_f, 2.0_f);
+  // ASSERT_EQ(42.0_f + 75.0_f, 117.0_f);
 }
 
