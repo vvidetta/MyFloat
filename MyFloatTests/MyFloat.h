@@ -31,7 +31,7 @@ private:
 
   [[nodiscard]] static constexpr auto field_mask(size_t pos, size_t width) -> uint64_t
   {
-    return ((1 << width) - 1) << pos;
+    return ((1Ui64 << width) - 1Ui64) << pos;
   }
 
   [[nodiscard]] static constexpr auto extract_field(uint64_t x, size_t pos, size_t width) -> uint64_t
@@ -93,8 +93,8 @@ private:
       return -1;
     }
 
-    auto top = 0;
-    while (x != 0) {
+    auto top = size_t{ 0 };
+    while (x != 1) {
       x >>= 1;
       ++top;
     }
@@ -102,6 +102,11 @@ private:
   }
 
   static const auto man_1 = (1Ui64 << man_width) - 1;
+
+  static constexpr auto unset_bit(uint64_t& x, size_t pos) noexcept -> void
+  {
+    x &= static_cast<uint64_t>(x) ^ (1Ui64 << pos);
+  }
 
   friend auto operator+(MyFloat x, MyFloat y) -> MyFloat
   {
@@ -112,20 +117,16 @@ private:
     }
 
     auto mx = x.mantissa();
-    if (mx == man_1) {
-      mx = 1Ui64 << man_width;
-    }
+    mx |= 1Ui64 << man_width;
 
     auto my = y.mantissa();
-    if (my == man_1) {
-      my = 1Ui64 << man_width;
-    }
+    my |= 1Ui64 << man_width;
 
     auto mr = mx + my;
 
-    auto shift = top_bit(mr) - (man_width + 1);
+    auto shift = top_bit(mr) - man_width;
     mr >>= shift;
-    mr &= (-1) ^ (1 << man_width);
+    unset_bit(mr, man_width);
 
     auto er = x.exponent() + shift;
 
