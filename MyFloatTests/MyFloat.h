@@ -18,6 +18,7 @@ struct MyFloat {
   }
 
 private:
+  static constexpr auto UINT64_T_WIDTH = sizeof(uint64_t) * CHAR_BIT;
   uint64_t repr;
 
   [[nodiscard]] static constexpr auto field_mask(size_t pos, size_t width) -> uint64_t
@@ -55,7 +56,7 @@ private:
     return extract_field(repr, sign_pos, sign_width);
   }
 
-  static_assert(sign_pos + sign_width == sizeof(uint64_t) * CHAR_BIT);
+  static_assert(sign_pos + sign_width == UINT64_T_WIDTH);
 
   explicit MyFloat(uint64_t signum, uint64_t exp, uint64_t man)
     : repr{ (signum << sign_pos) | (exp << exp_pos) | (man << man_pos) }
@@ -109,23 +110,26 @@ private:
 
     auto mx = x.mantissa();
     mx |= 1Ui64 << man_width;
-    mx <<= (exp_width - 2Ui64);
 
     auto my = y.mantissa();
     my |= 1Ui64 << man_width;
-    my <<= (exp_width - 2Ui64);
 
     auto ex = x.exponent();
-    ex -= (exp_width - 2Ui64);
-
     auto ey = y.exponent();
-    ey -= (exp_width - 2Ui64);
 
     if (ex > ey) {
-      my >>= ex - ey;
+      auto shift = ex - ey;
+      if (shift >= UINT64_T_WIDTH)
+        return x; // y is so small compared to x that it would make no difference.
+
+      my >>= shift;
       ey = ex;
     } else if (ey > ex) {
-      mx >>= ey - ex;
+      auto shift = ey - ex;
+      if (shift >= UINT64_T_WIDTH)
+        return y; // x is so small compared to y that it would make no difference.
+
+      mx >>= shift;
       ex = ey;
     }
 
