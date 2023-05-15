@@ -1,5 +1,6 @@
 #include "MyFloat.h"
 #include "gtest/gtest.h"
+#include <cfenv>
 #include <iostream>
 #include <numeric>
 #include <ranges>
@@ -32,6 +33,28 @@ TEST_P(MyFloatAdditionTests, CheckThatAdditionGivesExpectedResult)
   auto x = MyFloat{ param.first };
   auto y = MyFloat{ param.second };
   auto expectedResult = MyFloat{ param.result };
+
+
+  std::cout << fegetround() << "\n"
+    "D = " << FE_DOWNWARD << "\n"
+    "N = " << FE_TONEAREST << "\n"
+    "Z = " << FE_TOWARDZERO << "\n"
+    "U = " << FE_UPWARD << "\n";
+
+#define PRINT_CASE(x) \
+  case x: \
+  std::cout << #x << '\n'; \
+  break
+
+  switch (std::numeric_limits<double>::round_style)
+  {
+    PRINT_CASE(std::float_round_style::round_indeterminate);
+    PRINT_CASE(std::float_round_style::round_toward_infinity);
+    PRINT_CASE(std::float_round_style::round_toward_neg_infinity);
+    PRINT_CASE(std::float_round_style::round_toward_zero);
+    PRINT_CASE(std::float_round_style::round_to_nearest);
+  }
+
   ASSERT_EQ(expectedResult, x + y);
 }
 

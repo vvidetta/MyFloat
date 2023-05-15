@@ -110,9 +110,11 @@ private:
 
     auto mx = x.mantissa();
     mx |= 1Ui64 << man_width;
+    mx <<= ((UINT64_T_WIDTH - 3) - man_width);
 
     auto my = y.mantissa();
     my |= 1Ui64 << man_width;
+    my <<= ((UINT64_T_WIDTH - 3) - man_width);
 
     auto ex = x.exponent();
     auto ey = y.exponent();
@@ -146,10 +148,23 @@ private:
 
     if (sr == 1Ui64)
       mr = (~mr) ^ 1Ui64;
-    auto shift = top_bit(mr) - man_width;
-    auto er = ex + shift;
+    auto top = top_bit(mr);
+    auto shift = top - man_width;
+    auto de = 
+      top == UINT64_T_WIDTH - 2 ? 11 :
+      top == UINT64_T_WIDTH - 3 ? 10 :
+      top == UINT64_T_WIDTH - 4 ? 9 :
+      top == UINT64_T_WIDTH - 5 ? 8 :
+      top == UINT64_T_WIDTH - 6 ? 7 :
+      top == UINT64_T_WIDTH - 7 ? 6 :
+      5 ;
+    auto er = ex + de - 10;
 
-    mr >>= shift;
+    mr >>= (shift - 1Ui64);
+    auto bottom_bit = mr && 1Ui64;
+    if (bottom_bit == 1Ui64)
+      mr += 1Ui64; // Rounding
+    mr >>= 1;
     unset_bit(mr, man_width);
 
     return MyFloat{ sr, er, mr };
